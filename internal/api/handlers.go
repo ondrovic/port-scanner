@@ -13,7 +13,12 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.GET("/scan", handleScan)
+	r.GET("/health", handleHealth)
 	return r
+}
+
+func handleHealth(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
 func handleScan(c *gin.Context) {

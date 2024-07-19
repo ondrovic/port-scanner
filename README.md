@@ -89,12 +89,19 @@ Response
 
    ```yaml
    services:
-     port-scanner:
-       image: ondrovic/port-scanner:latest
-       ports:
-         - "9000:8080"
-       environment:
-         - PORT=8080
+    port-scanner:
+        image: ondrovic/port-scanner:latest
+        ports:
+        - "${PORT}:${PORT}"
+        environment:
+        - PORT=${PORT}
+        restart: unless-stopped
+        healthcheck:
+        test: wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+        interval: 60s
+        retries: 5
+        start_period: 20s
+        timeout: 10s
     ```
 3. Save the file
 4. Open a terminal and navigate to the directory containing your `docker-compose.yml` file.
