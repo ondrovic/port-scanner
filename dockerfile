@@ -26,7 +26,7 @@ WORKDIR /root/
 COPY --from=builder /app/main .
 
 # Copy the .env file
-# COPY .env .
+COPY .env .
 
 # Set a default port
 ARG PORT=8080
