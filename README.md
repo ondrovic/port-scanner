@@ -95,12 +95,6 @@ Response
          - "9000:8080"
        environment:
          - PORT=8080
-     healthcheck:
-      test: curl --fail http//:localhost:9000 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 20s
-      timeout: 10s
     ```
 3. Save the file
 4. Open a terminal and navigate to the directory containing your `docker-compose.yml` file.
