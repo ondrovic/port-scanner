@@ -96,7 +96,7 @@ Response
        environment:
          - PORT=8080
      healthcheck:
-      test: curl --fail http//localhost:9000 || exit 1
+      test: curl --fail http//:localhost:9000 || exit 1
       interval: 60s
       retries: 5
       start_period: 20s
