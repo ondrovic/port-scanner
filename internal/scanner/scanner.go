@@ -93,9 +93,9 @@ func ScanPorts(host string, startPort, endPort int) models.ScanResult {
 	totalPorts := endPort - startPort + 1
 
 	p, _ := pterm.DefaultProgressbar.WithTotal(totalPorts).WithTitle(fmt.Sprintf("Scanning ports on: %s (%s)", host, ip)).WithMaxWidth(100).Start()
-	
+
 	defer p.Stop()
-	
+
 	var wg sync.WaitGroup
 	ports := make(chan int, maxWorkers)
 	results := make(chan int, totalPorts)
