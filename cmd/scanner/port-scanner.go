@@ -28,7 +28,7 @@ func main() {
 	rootCmd.Flags().StringVarP(&flags.Host, "target", "t", "", "Target you wish to scan")
 	rootCmd.Flags().IntVarP(&flags.StartPort, "start-port", "s", 1, "Starting port number to scan")
 	rootCmd.Flags().IntVarP(&flags.EndPort, "end-port", "e", 65535, "Ending port number to scan")
-	
+
 	rootCmd.MarkFlagsRequiredTogether("target")
 
 	if err := rootCmd.Execute(); err != nil {

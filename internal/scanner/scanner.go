@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"sync"
@@ -22,57 +23,65 @@ var (
 	timeout    time.Duration
 	maxWorkers int
 	retries    int
-	envFile    string
+	EnvFile    string
 )
 
 func init() {
-	utils.ClearConsole()
-	// Get the directory of the current file
-	
-	projRoot, err := utils.GetProjectRoot()
-	if err != nil {
-		pterm.Warning.PrintOnError(err)
-	}
+    utils.ClearConsole()
 
-	envFile = fmt.Sprintf("%s\\.env", projRoot)
+	if os.Getenv("PORT_TIMEOUT") == "" && os.Getenv("SCAN_WORKERS") == "" && os.Getenv("SCAN_RETRIES") == "" {
+		projRoot, err := utils.GetProjectRoot()
+        if err != nil {
+            pterm.Warning.PrintOnError(err)
+        }
 
-	if err := godotenv.Load(envFile); err != nil {
-		pterm.Warning.Printfln("No .env file found")
-	}
+        envLocations := []string{
+            filepath.Join(projRoot, ".env"),
+            "/app/.env",
+        }
 
-	timeOutMs, err := getEnvInt("PORT_TIMEOUT", 1000)
+        envLoaded := false
+        for _, loc := range envLocations {
+            if err := godotenv.Load(loc); err == nil {
+                EnvFile = loc
+                envLoaded = true
+                pterm.Success.Printfln("Loaded .env file from: %s", loc)
+                break
+            }
+        }
+
+        if !envLoaded {
+            pterm.Info.Printfln("No .env file found, using default or provided environment variables")
+        }
+    }
+
+    // Load environment variables or use defaults
+    timeOutMs, err := getEnvInt("PORT_TIMEOUT", 1000)
     if err != nil {
-        pterm.Warning.Printfln("Invalid PORT_TIMEOUT value: %v, using default: %v", err, timeOutMs)
+        pterm.Info.Printfln("Using default PORT_TIMEOUT: %v", timeOutMs)
     }
     timeout = time.Duration(timeOutMs) * time.Millisecond
 
     maxWorkers, err = getEnvInt("SCAN_WORKERS", 5000)
     if err != nil {
-        pterm.Warning.Printfln("Invalid SCAN_WORKERS value: %v, using default: %v", err, maxWorkers)
+        pterm.Info.Printfln("Using default SCAN_WORKERS: %v", maxWorkers)
     }
 
     retries, err = getEnvInt("SCAN_RETRIES", 3)
     if err != nil {
-        pterm.Warning.Printfln("Invalid SCAN_RETRIES value: %v, using default: %v", err, retries)
+        pterm.Info.Printfln("Using default SCAN_RETRIES: %v", retries)
     }
-}
-
-func getEnv(key, fallback string) string {
-    value := os.Getenv(key)
-    if value == "" {
-        pterm.Warning.Printfln("Environment variable %s not set, using default value: %s", key, fallback)
-        return fallback
-    }
-    return value
 }
 
 func getEnvInt(key string, fallback int) (int, error) {
-    strValue := getEnv(key, strconv.Itoa(fallback))
-    intValue, err := strconv.Atoi(strValue)
-    if err != nil {
-        return fallback, fmt.Errorf("invalid value for %s: %v", key, err)
+    if value, exists := os.LookupEnv(key); exists {
+        intValue, err := strconv.Atoi(value)
+        if err != nil {
+            return fallback, fmt.Errorf("invalid %s value: %v", key, err)
+        }
+        return intValue, nil
     }
-    return intValue, nil
+    return fallback, nil
 }
 
 func scanPort(ctx context.Context, ip string, port int) (bool, string) {
