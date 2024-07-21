@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	utils.ClearConsole()
 	var flags models.CommandFlags
 	var rootCmd = &cobra.Command{
 		Use:   "port-scanner",
@@ -29,7 +28,7 @@ func main() {
 	rootCmd.Flags().StringVarP(&flags.Host, "target", "t", "", "Target you wish to scan")
 	rootCmd.Flags().IntVarP(&flags.StartPort, "start-port", "s", 1, "Starting port number to scan")
 	rootCmd.Flags().IntVarP(&flags.EndPort, "end-port", "e", 65535, "Ending port number to scan")
-
+	
 	rootCmd.MarkFlagsRequiredTogether("target")
 
 	if err := rootCmd.Execute(); err != nil {

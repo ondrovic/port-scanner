@@ -2,10 +2,12 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 
 	"port-scanner/internal/models"
@@ -40,4 +42,31 @@ func ClearConsole() {
 
 	clearCmd.Stdout = os.Stdout
 	clearCmd.Run()
+}
+
+// GetProjectRoot returns the root directory of the project containing a .env file.
+func GetProjectRoot() (string, error) {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return "", errors.New("could not get current file info")
+	}
+
+	// Get the directory of the current file
+	dir := filepath.Dir(filename)
+
+	// Traverse up the directory tree to find the project root
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ".env")); err == nil {
+			return dir, nil
+		}
+
+		// Move up one directory
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break // reached the root of the filesystem
+		}
+		dir = parent
+	}
+
+	return "", errors.New("could not find project root containing .env")
 }
