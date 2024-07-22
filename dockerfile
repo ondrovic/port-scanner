@@ -1,5 +1,5 @@
+# Build stage
 FROM golang:1.22.5-alpine AS builder
-# Set the working directory inside the container
 WORKDIR /app
 
 # Copy go mod and sum files
@@ -17,6 +17,11 @@ RUN rm -f .env
 # Build the application
 RUN go build -o port-scanner ./cmd/scanner
 
+# Final stage
+FROM alpine:latest
+
+# Copy the binary from the builder stage
+COPY --from=builder /app/port-scanner /port-scanner
+
 # Command to run the executable
-ENTRYPOINT ["./port-scanner"]
-# ENTRYPOINT ["sh"]
+ENTRYPOINT ["/port-scanner"]
