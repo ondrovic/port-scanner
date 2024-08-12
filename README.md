@@ -1,3 +1,4 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/ondrovic/port-scanner/badge)](https://www.codefactor.io/repository/github/ondrovic/port-scanner)
 # Port Scanner
 
 A concurrent port scanner
